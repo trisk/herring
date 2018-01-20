@@ -4,6 +4,7 @@ var React = require('react');
 var cx = require('classnames');
 var request = require('then-request');
 var RoundInfoComponent = require('./round-info');
+var RoundToggleComponent = require('./round-toggle');
 var CelebrationModal = require('./celebration');
 var UrlChangeModal = require('./url-editor');
 
@@ -41,6 +42,9 @@ var PuzzleComponent = React.createClass({
         var celebrationModal;
         var urlChangeModal;
         var puzzlePageButton;
+        var backsolved;
+
+        backsolved = (puzzle.tags.match(/(^|\s)backsolved($|,)/i) != null);
 
         if (this.state.celebrating) {
             celebrationModal = <CelebrationModal puzzle={ puzzle }
@@ -62,6 +66,7 @@ var PuzzleComponent = React.createClass({
                 </a>
             );
         }
+
         return (
             <div key={ puzzle.id } className="row">
               <div className="col-lg-12">
@@ -78,7 +83,13 @@ var PuzzleComponent = React.createClass({
                         className="col-xs-6 col-sm-3 col-md-3 col-lg-2 answer editable"
                         val={ puzzle.answer }
                         onSubmit={ this.updateAnswer }
-                    />
+                    >
+                      <RoundToggleComponent
+                          className="col-xs-6 col-sm-6 col-md-4 col-lg-4 backsolved"
+                          val={ backsolved }
+                          onClick={ this.updateBacksolved }
+                      />
+                    </RoundInfoComponent>
                     <RoundInfoComponent
                         className="visible-md visible-lg col-md-3 col-lg-4 note editable"
                         val={ puzzle.note }
@@ -111,6 +122,28 @@ var PuzzleComponent = React.createClass({
     },
     updateTags(val) {
         this.updateData('tags', val);
+    },
+    updateBacksolved(val) {
+        var puzzle = this.props.puzzle;
+        var tag = 'backsolved';
+        var tags;
+        var i;
+
+        tags = puzzle.tags.split(/,\s*/);
+        for (i = 0; i < tags.length; i++) {
+            if (tags[i].toLowerCase() == tag) {
+                if (val) {
+                    break;
+                } else {
+                    tags.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+        if (val && i == tags.length)
+            tags.push(tag);
+
+        this.updateData('tags', tags.join(', '));
     },
     updateData(key, val) {
         // TODO

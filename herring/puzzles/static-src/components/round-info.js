@@ -26,6 +26,7 @@ var RoundInfoComponent = React.createClass({
     },
     render: function() {
         var contents;
+
         if (this.state.editable) {
             contents = (
                 <form onSubmit={ this.onSubmit }>
@@ -45,6 +46,7 @@ var RoundInfoComponent = React.createClass({
             <div ref="editableComponent" className={ this.props.className }
                  onClick={ this.editElement } >
                 { contents }
+                { this.props.children }
             </div>
         );
     },
